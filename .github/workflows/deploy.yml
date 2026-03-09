@@ -26,7 +26,7 @@ jobs:
 
   deploy-cloudflare:
     needs: build
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -34,7 +34,11 @@ jobs:
           path: dist/
 
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist --project-name blackroad-io --commit-dirty=true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name blackroad-io --commit-dirty=true
 
   deploy-railway:
     needs: build
@@ -53,7 +57,7 @@ jobs:
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up --detach
+        run: railway up --detach --service blackroad-cloud
 
   deploy-pis:
     needs: build
